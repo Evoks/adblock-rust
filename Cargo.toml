@@ -29,10 +29,10 @@ regex = "1.4"
 bitflags = "1.2"
 itertools = "0.9"
 idna = "0.2"
-serde =  { version = "1.0", features = ["derive", "rc"] }
-flate2 = { version = "1.0", features = ["rust_backend"], default-features = false }
+serde =  { version = "1.0.123", features = ["derive", "rc"] }
+flate2 = { version = "1.0.20", features = ["rust_backend"], default-features = false }
 seahash = "3"   # seahash 4 introduces a breaking hash algorithm change
-twoway = "0.2"
+twoway = "0.2.1"
 base64 = "0.13"
 rmp-serde = "0.13.7"    # rmp-serde 0.14.0 breaks deserialization by changing how enums are deserialized
 lifeguard = { version = "^ 0.6.1", optional = true }

@@ -1,6 +1,6 @@
 [package]
 name = "adblock-rs"
-version = "0.3.3"
+version = "0.3.4"
 authors = ["Andrius Aucinas <aaucinas@brave.com>", "Anton Lazarev <alazarev@brave.com>"]
 edition = "2018"
 license = "MPL-2.0"
@@ -12,10 +12,10 @@ name = "adblock_rs"
 crate-type = ["cdylib"]
 
 [build-dependencies]
-neon-build = "0.3.3"
+neon-build = "=0.7.1"
 
 [dependencies]
-neon-serde = "0.3"
-serde =  { version = "1.0", features = ["derive", "rc"] }
+serde =  { version = "1.0.123", features = ["derive", "rc"] }
 adblock = { path = "../", default-features = false, features = ["css-validation", "content-blocking", "embedded-domain-resolver", "resource-assembler"] }
-neon = "0.3.3"
+neon = "=0.7.1"
+neon-serde = { path = "../neon-serde" }
