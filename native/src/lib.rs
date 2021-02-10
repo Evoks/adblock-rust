@@ -26,7 +26,7 @@ declare_types! {
             // Second argument is the optional format of the rules, defaulting to
             // FilterFormat::Standard
             let format = match cx.argument_opt(1) {
-                Some(format_arg) => neon_serde::from_value(&mut cx, format_arg)?,
+                Some(format_arg) => neon_serde::from_value(&mut cx, format_arg).or_else(|e| cx.throw_error(e.to_string())).unwrap(),
                 None => FilterFormat::Standard,
             };
 
@@ -53,7 +53,7 @@ declare_types! {
         method addFilter(mut cx) {
             let filter: String = cx.argument::<JsString>(0)?.value();
             let format = match cx.argument_opt(1) {
-                Some(format_arg) => neon_serde::from_value(&mut cx, format_arg)?,
+                Some(format_arg) => neon_serde::from_value(&mut cx, format_arg).or_else(|e| cx.throw_error(e.to_string())).unwrap(),
                 None => FilterFormat::Standard,
             };
 
@@ -69,7 +69,7 @@ declare_types! {
 
         method intoContentBlocking(mut cx) {
             let rule_types = match cx.argument_opt(0) {
-                Some(rule_types) => neon_serde::from_value(&mut cx, rule_types)?,
+                Some(rule_types) => neon_serde::from_value(&mut cx, rule_types).or_else(|e| cx.throw_error(e.to_string())).unwrap(),
                 None => RuleTypes::default(),
             };
 
@@ -83,8 +83,8 @@ declare_types! {
 
             match cloned.into_content_blocking(rule_types) {
                 Ok((cb_rules, filters_used)) => {
-                    let cb_rules = neon_serde::to_value(&mut cx, &cb_rules)?;
-                    let filters_used = neon_serde::to_value(&mut cx, &filters_used)?;
+                    let cb_rules = neon_serde::to_value(&mut cx, &cb_rules).or_else(|e| cx.throw_error(e.to_string())).unwrap();
+                    let filters_used = neon_serde::to_value(&mut cx, &filters_used).or_else(|e| cx.throw_error(e.to_string())).unwrap();
                     let js_result = JsObject::new(&mut cx);
                     js_result.set(&mut cx, "contentBlockingRules", cb_rules)?;
                     js_result.set(&mut cx, "filtersUsed", filters_used)?;
@@ -145,7 +145,7 @@ declare_types! {
                 engine.check_network_urls(&url, &source_url, &request_type)
             };
             if debug {
-                let js_value = neon_serde::to_value(&mut cx, &result)?;
+                let js_value = neon_serde::to_value(&mut cx, &result).or_else(|e| cx.throw_error(e.to_string())).unwrap();
                 Ok(js_value)
             } else {
                 Ok(cx.boolean(result.matched).upcast())
@@ -198,7 +198,7 @@ declare_types! {
 
         method useResources(mut cx) {
             let resources_arg = cx.argument::<JsValue>(0)?;
-            let resources: Vec<Resource> = neon_serde::from_value(&mut cx, resources_arg)?;
+            let resources: Vec<Resource> = neon_serde::from_value(&mut cx, resources_arg).or_else(|e| cx.throw_error(e.to_string())).unwrap();
 
             let mut this = cx.this();
             let guard = cx.lock();
@@ -234,7 +234,7 @@ declare_types! {
 
         method addResource(mut cx) {
             let resource_arg = cx.argument::<JsValue>(0)?;
-            let resource: Resource = neon_serde::from_value(&mut cx, resource_arg)?;
+            let resource: Resource = neon_serde::from_value(&mut cx, resource_arg).or_else(|e| cx.throw_error(e.to_string())).unwrap();
 
             let mut this = cx.this();
             let guard = cx.lock();
@@ -242,7 +242,7 @@ declare_types! {
                 let mut engine = this.borrow_mut(&guard);
                 engine.add_resource(resource).is_ok()
             };
-            let js_value = neon_serde::to_value(&mut cx, &success)?;
+            let js_value = neon_serde::to_value(&mut cx, &success).or_else(|e| cx.throw_error(e.to_string())).unwrap();
             Ok(js_value)
         }
 
@@ -255,7 +255,7 @@ declare_types! {
                 let engine = this.borrow(&guard);
                 engine.get_resource(&name)
             };
-            let js_value = neon_serde::to_value(&mut cx, &result)?;
+            let js_value = neon_serde::to_value(&mut cx, &result).or_else(|e| cx.throw_error(e.to_string())).unwrap();
             Ok(js_value)
         }
     }
@@ -278,7 +278,7 @@ fn ublock_resources(mut cx: FunctionContext) -> JsResult<JsValue> {
     let mut resources = assemble_web_accessible_resources(&Path::new(&web_accessible_resource_dir), &Path::new(&redirect_engine_path));
     resources.append(&mut assemble_scriptlet_resources(&Path::new(&scriptlets_path)));
 
-    let js_resources = neon_serde::to_value(&mut cx, &resources)?;
+    let js_resources = neon_serde::to_value(&mut cx, &resources).or_else(|e| cx.throw_error(e.to_string())).unwrap();
 
     Ok(js_resources)
 }
@@ -286,10 +286,10 @@ fn ublock_resources(mut cx: FunctionContext) -> JsResult<JsValue> {
 fn build_filter_format_enum<'a, C: Context<'a>>(cx: &mut C) -> JsResult<'a, JsObject> {
     let filter_format_enum = JsObject::new(cx);
 
-    let standard = neon_serde::to_value(cx, &FilterFormat::Standard)?;
+    let standard = neon_serde::to_value(cx, &FilterFormat::Standard).or_else(|e| cx.throw_error(e.to_string())).unwrap();
     filter_format_enum.set(cx, "STANDARD", standard)?;
 
-    let hosts = neon_serde::to_value(cx, &FilterFormat::Hosts)?;
+    let hosts = neon_serde::to_value(cx, &FilterFormat::Hosts).or_else(|e| cx.throw_error(e.to_string())).unwrap();
     filter_format_enum.set(cx, "HOSTS", hosts)?;
 
     Ok(filter_format_enum)
@@ -298,13 +298,13 @@ fn build_filter_format_enum<'a, C: Context<'a>>(cx: &mut C) -> JsResult<'a, JsOb
 fn build_rule_types_enum<'a, C: Context<'a>>(cx: &mut C) -> JsResult<'a, JsObject> {
     let rule_types_enum = JsObject::new(cx);
 
-    let all = neon_serde::to_value(cx, &RuleTypes::All)?;
+    let all = neon_serde::to_value(cx, &RuleTypes::All).or_else(|e| cx.throw_error(e.to_string())).unwrap();
     rule_types_enum.set(cx, "ALL", all)?;
 
-    let network_only = neon_serde::to_value(cx, &RuleTypes::NetworkOnly)?;
+    let network_only = neon_serde::to_value(cx, &RuleTypes::NetworkOnly).or_else(|e| cx.throw_error(e.to_string())).unwrap();
     rule_types_enum.set(cx, "NETWORK_ONLY", network_only)?;
 
-    let cosmetic_only = neon_serde::to_value(cx, &RuleTypes::CosmeticOnly)?;
+    let cosmetic_only = neon_serde::to_value(cx, &RuleTypes::CosmeticOnly).or_else(|e| cx.throw_error(e.to_string())).unwrap();
     rule_types_enum.set(cx, "COSMETIC_ONLY", cosmetic_only)?;
 
     Ok(rule_types_enum)
